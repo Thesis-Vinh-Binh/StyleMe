@@ -78,7 +78,7 @@ def save_image(net_g, dataloader, saved_image_folder, n_iter):
         # 计算fid指标
         fid = calculate_fid_modify(imgs[0,0,:,:].detach().numpy(), real[0,0,:,:].detach().numpy())
         print('fid-------------', fid)
-        vutils.save_image( sss, "%s/iter_%d.jpg"%(saved_image_folder, n_iter), range=(-1,1), normalize=True)
+        vutils.save_image( sss, "%s/iter_%d.jpg"%(saved_image_folder, n_iter), value_range=(-1,1), normalize=True)
         del imgs
     net_g.train()
 
@@ -90,15 +90,23 @@ def train(net_g, net_d_style, max_iteration):
     saved_model_folder, saved_image_folder = creat_folder(save_folder, trial_name)
     
     for n_iter in tqdm.tqdm(range(max_iteration+1)):
-        if (n_iter+1)%(100)==0:
+        if (n_iter+1)%(5000)==0:
             try:
                 model_dict = {'g': net_g.state_dict(), 'ds':net_d_style.state_dict()}
                 torch.save(model_dict, os.path.join(saved_model_folder, '%d_model.pth'%(n_iter)))
+                # opt_dict = {'g': optG.state_dict(), 'ds':optDS.state_dict()}
+                # torch.save(opt_dict, os.path.join(saved_model_folder, '%d_opt.pth'%(n_iter)))
+            except:
+                print("models not properly saved")
+        if (n_iter+1)%(10000)==0:
+            try:
+                # model_dict = {'g': net_g.state_dict(), 'ds':net_d_style.state_dict()}
+                # torch.save(model_dict, os.path.join(saved_model_folder, '%d_model.pth'%(n_iter)))
                 opt_dict = {'g': optG.state_dict(), 'ds':optDS.state_dict()}
                 torch.save(opt_dict, os.path.join(saved_model_folder, '%d_opt.pth'%(n_iter)))
             except:
                 print("models not properly saved")
-        if n_iter%100==0:
+        if n_iter%1000==0:
             save_image(net_g, dataloader_A_fixed, saved_image_folder, n_iter)
         
         ## 1. prepare data
